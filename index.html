@@ -336,13 +336,16 @@ sendMessage('D. '+text)}
 let SYSTEM_PROMPT = '';
 
 async function loadPrompt(){
+async function loadPrompt(){
 try{
 const res=await fetch('./prompt.txt');
-if(!res.ok)throw new Error('加载prompt失败');
-SYSTEM_PROMPT=await res.text()}
+if(!res.ok)throw new Error('加载prompt失败：'+res.status);
+SYSTEM_PROMPT=await res.text();
+document.getElementById('dialogue-text').textContent='prompt加载成功，长度：'+SYSTEM_PROMPT.length}
 catch(e){
 SYSTEM_PROMPT='你是规则怪谈×情侣模拟器的DM。请用JSON格式输出：{"speaker":"","text":"","mood":"calm","choices":["A.","B.","C.","D. 自定义"],"sound":"none"}';
-console.error(e)}}
+document.getElementById('dialogue-text').textContent='prompt加载失败：'+e.message}}
+
 
 // ===== API 通信 =====
 async function sendMessage(userInput){
