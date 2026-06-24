@@ -274,6 +274,15 @@ btn.className='choice-btn fade-in';
 btn.textContent=c;
 btn.onclick=()=>selectChoice(c);
 area.appendChild(btn)}});
+// 重新生成按钮
+const regenBtn=document.createElement('div');
+regenBtn.className='choice-btn';
+regenBtn.textContent='↻ 重新生成';
+regenBtn.style.textAlign='center';
+regenBtn.style.color='#808090';
+regenBtn.style.borderColor='#1a1a2a';
+regenBtn.onclick=()=>{messages.pop();gameHistory.pop();area.innerHTML='';area.classList.remove('show');const lastUserMsg=gameHistory.filter(h=>h.role==='user').pop();sendMessage(lastUserMsg?lastUserMsg.content:'继续')};
+area.appendChild(regenBtn);
 setTimeout(()=>area.classList.add('show'),100)}
 
 function selectChoice(choice){
@@ -322,7 +331,7 @@ try{
 const res=await fetch(config.url,{
 method:'POST',
 headers:{'Content-Type':'application/json','Authorization':'Bearer '+config.key},
-body:JSON.stringify({model:config.model,messages:[{role:'system',content:SYSTEM_PROMPT},...messages],stream:false})});
+body:JSON.stringify({model:config.model,messages:[{role:'system',content:SYSTEM_PROMPT},...messages],stream:false,temperature:0.82,max_tokens:8192})});
 
 if(!res.ok){
 const errBody=await res.text().catch(()=>'');
@@ -340,7 +349,16 @@ const jsonMatch=jsonStr.match(/\{[\s\S]*\}/);
 if(!jsonMatch)throw new Error('未找到JSON');
 parsed=JSON.parse(jsonMatch[0])}
 catch(e){
-parsed={speaker:'',text:reply.replace(/[{}"]/g,'').replace(/\\n/g,'\n').substring(0,500),mood:'calm',choices:['A. 继续','B. 观察周围','C. 等待','D. 自定义'],sound:'none'}}
+// 兜底：尝试从原始文本提取可读内容
+let cleanText=reply;
+cleanText=cleanText.replace(/```json?\s*/g,'').replace(/```\s*/g,'');
+cleanText=cleanText.replace(/"speaker"\s*:\s*"[^"]*"\s*,?\s*/g,'');
+cleanText=cleanText.replace(/"mood"\s*:\s*"[^"]*"\s*,?\s*/g,'');
+cleanText=cleanText.replace(/"choices"\s*:\s*\[[\s\S]*?\]\s*,?\s*/g,'');
+cleanText=cleanText.replace(/"sound"\s*:\s*"[^"]*"\s*,?\s*/g,'');
+cleanText=cleanText.replace(/"text"\s*:\s*"/g,'');
+cleanText=cleanText.replace(/[{}]/g,'').replace(/\\n/g,'\n').replace(/"\s*,?\s*$/,'').trim();
+parsed={speaker:'',text:cleanText.substring(0,1000),mood:'calm',choices:['A. 继续','B. 观察周围','C. 等待','D. 自定义'],sound:'none'}}
 
 loading.classList.remove('show');
 await displayScene(parsed);
