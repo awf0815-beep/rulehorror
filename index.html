@@ -17,6 +17,13 @@ body{background:#0a0a0f;color:#e0e0e0;position:relative}
 .mood-calm{background:linear-gradient(160deg,#0a0f1a 0%,#101828 50%,#0a0d14 100%);box-shadow:inset 0 0 100px rgba(0,10,40,0.6)}
 .mood-uncanny{background:linear-gradient(160deg,#0f1a0f 0%,#1a1a0a 50%,#0a140f 100%);box-shadow:inset 0 0 150px rgba(20,40,0,0.7)}
 #particles{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none}
+#fog-layer{position:fixed;top:0;left:0;width:200%;height:100%;z-index:1;pointer-events:none;opacity:0.4;background:linear-gradient(90deg,transparent 0%,rgba(20,20,30,0.3) 20%,transparent 40%,rgba(15,15,25,0.2) 60%,transparent 80%);animation:fogDrift 30s linear infinite;transition:opacity 3s}
+@keyframes fogDrift{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+#shadow-container{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:hidden}
+.shadow-figure{position:absolute;width:80px;height:200px;background:radial-gradient(ellipse,rgba(0,0,0,0.4) 0%,transparent 70%);border-radius:50%;filter:blur(20px);opacity:0;animation:shadowAppear 12s ease-in-out infinite}
+@keyframes shadowAppear{0%,100%{opacity:0;transform:translateY(10px) scale(0.8)}30%,70%{opacity:0.6;transform:translateY(-20px) scale(1)}50%{opacity:0.8;transform:translateY(-30px) scale(1.1)}}
+.glow-orb{position:absolute;width:6px;height:6px;background:radial-gradient(circle,rgba(180,180,200,0.6) 0%,transparent 70%);border-radius:50%;filter:blur(3px);opacity:0;animation:orbFloat 15s ease-in-out infinite}
+@keyframes orbFloat{0%,100%{opacity:0;transform:translate(0,0)}20%{opacity:0.5}50%{opacity:0.8;transform:translate(30px,-50px)}80%{opacity:0.3}100%{transform:translate(60px,-20px)}}
 #vignette{position:fixed;top:0;left:0;width:100%;height:100%;z-index:2;pointer-events:none;box-shadow:inset 0 0 100px 40px rgba(0,0,0,0.7);transition:box-shadow 2s}
 #game-container{position:relative;z-index:10;width:100%;height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding:10px}
 #setup-screen{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1000;background:#0a0a0f;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
@@ -25,17 +32,15 @@ body{background:#0a0a0f;color:#e0e0e0;position:relative}
 #setup-screen input{width:100%;max-width:320px;padding:12px 16px;margin:6px 0;background:#15151f;border:1px solid #2a2a3a;border-radius:8px;color:#e0e0e0;font-size:0.9em;outline:none}
 #setup-screen input:focus{border-color:#4a4a6a}
 #setup-screen button{margin-top:20px;padding:12px 40px;background:linear-gradient(135deg,#2a2040,#3a2a50);border:1px solid #4a3a6a;border-radius:8px;color:#c8b8d0;font-size:1em;cursor:pointer;transition:all 0.3s}
-#setup-screen button:hover{background:linear-gradient(135deg,#3a2a50,#4a3a60);border-color:#6a5a8a}
 .setup-label{width:100%;max-width:320px;text-align:left;font-size:0.8em;color:#888;margin-top:12px;margin-bottom:2px}
 #title-screen{position:fixed;top:0;left:0;width:100%;height:100%;z-index:999;background:#0a0a0f;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center}
 #title-screen h1{font-size:1.8em;color:#c8b8a0;text-shadow:0 0 30px rgba(200,180,160,0.4);margin-bottom:10px;letter-spacing:2px}
 #title-screen p{color:#666;font-size:0.85em;margin-bottom:40px}
-#title-screen button{padding:14px 50px;background:transparent;border:1px solid #3a3a4a;border-radius:8px;color:#a0a0b0;font-size:1em;cursor:pointer;transition:all 0.5s;letter-spacing:4px}
-#title-screen button:hover{border-color:#6a5a8a;color:#c8b8d0;text-shadow:0 0 10px rgba(200,180,200,0.3)}
-#dialogue-area{background:linear-gradient(180deg,transparent,rgba(5,5,10,0.85) 20%,rgba(5,5,10,0.95));padding:20px 16px;padding-bottom:env(safe-area-inset-bottom,10px);border-radius:16px 16px 0 0;min-height:35vh;max-height:55vh;display:flex;flex-direction:column;justify-content:flex-end;backdrop-filter:blur(10px)}
+#title-screen button{padding:14px 50px;background:transparent;border:1px solid #3a3a4a;border-radius:8px;color:#a0a0b0;font-size:1em;cursor:pointer;transition:all 0.5s;letter-spacing:4px;margin-top:10px}
+#dialogue-area{background:linear-gradient(180deg,transparent,rgba(5,5,10,0.85) 15%,rgba(5,5,10,0.95));padding:20px 16px;padding-bottom:env(safe-area-inset-bottom,10px);border-radius:16px 16px 0 0;min-height:45vh;max-height:65vh;display:flex;flex-direction:column;justify-content:flex-end;backdrop-filter:blur(10px)}
 #speaker-name{font-size:0.8em;color:#a89070;margin-bottom:6px;letter-spacing:1px;opacity:0;transition:opacity 0.5s}
 #speaker-name.show{opacity:1}
-#dialogue-text{font-size:0.95em;line-height:1.8;color:#d8d8dc;min-height:80px;white-space:pre-wrap;overflow-y:auto;max-height:30vh}
+#dialogue-text{font-size:0.95em;line-height:1.8;color:#d8d8dc;min-height:100px;white-space:pre-wrap;overflow-y:auto;max-height:40vh}
 #dialogue-text .cursor{display:inline-block;width:2px;height:1em;background:#a0a0b0;margin-left:2px;animation:blink 1s infinite}
 @keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
 #choices-area{margin-top:16px;display:flex;flex-direction:column;gap:8px;opacity:0;transition:opacity 0.5s}
@@ -81,6 +86,8 @@ body{background:#0a0a0f;color:#e0e0e0;position:relative}
 <body>
 <div id="atmosphere" class="mood-calm"></div>
 <canvas id="particles"></canvas>
+<div id="fog-layer"></div>
+<div id="shadow-container"></div>
 <div id="vignette"></div>
 <div id="loading-overlay"></div>
 <div id="setup-screen">
@@ -98,7 +105,7 @@ body{background:#0a0a0f;color:#e0e0e0;position:relative}
 <h1>规则怪谈×情侣模拟器</h1>
 <p>如果你违反了规则，你会死。<br>如果你看不透她——你可能已经在违反规则了。</p>
 <button onclick="startGame()">开始游戏</button>
-<button onclick="openLoadPanel()" style="margin-top:12px;padding:10px 30px;font-size:0.85em;letter-spacing:2px">读取存档</button>
+<button onclick="openLoadPanel()">读取存档</button>
 </div>
 <div id="toolbar" style="display:none">
 <div class="tool-btn" onclick="toggleSound()" title="音效">♪</div>
@@ -117,18 +124,9 @@ body{background:#0a0a0f;color:#e0e0e0;position:relative}
 </div>
 </div>
 <div id="history-panel">
-<div id="history-header">
-<h2>剧情回看</h2>
-<button id="history-close" onclick="closeHistory()">关闭</button>
-</div>
-<div id="history-content">
-<div id="history-page"></div>
-</div>
-<div id="history-nav">
-<button onclick="historyPrev()">上一页</button>
-<span id="history-page-num">1/1</span>
-<button onclick="historyNext()">下一页</button>
-</div>
+<div id="history-header"><h2>剧情回看</h2><button id="history-close" onclick="closeHistory()">关闭</button></div>
+<div id="history-content"><div id="history-page"></div></div>
+<div id="history-nav"><button onclick="historyPrev()">上一页</button><span id="history-page-num">1/1</span><button onclick="historyNext()">下一页</button></div>
 </div>
 <div id="save-panel">
 <h2 id="save-panel-title">存档</h2>
@@ -141,18 +139,41 @@ body{background:#0a0a0f;color:#e0e0e0;position:relative}
 <script>
 
 // ===== 全局状态 =====
-let config = {url:'',key:'',model:''};
-let gameHistory = [];
-let messages = [];
-let currentMood = 'calm';
-let soundEnabled = true;
-let isTyping = false;
-let historyPageIndex = 0;
-let savePanelMode = 'save';
+let config={url:'',key:'',model:''};
+let gameHistory=[];
+let messages=[];
+let currentMood='calm';
+let soundEnabled=true;
+let isTyping=false;
+let historyPageIndex=0;
+let savePanelMode='save';
+
+// ===== 暗影系统 =====
+function createShadows(){
+const container=document.getElementById('shadow-container');
+container.innerHTML='';
+for(let i=0;i<3;i++){
+const shadow=document.createElement('div');
+shadow.className='shadow-figure';
+shadow.style.left=Math.random()*80+10+'%';
+shadow.style.top=Math.random()*60+20+'%';
+shadow.style.animationDelay=Math.random()*8+'s';
+shadow.style.animationDuration=(10+Math.random()*8)+'s';
+container.appendChild(shadow)}
+for(let i=0;i<4;i++){
+const orb=document.createElement('div');
+orb.className='glow-orb';
+orb.style.left=Math.random()*90+5+'%';
+orb.style.top=Math.random()*70+15+'%';
+orb.style.animationDelay=Math.random()*10+'s';
+orb.style.animationDuration=(12+Math.random()*10)+'s';
+container.appendChild(orb)}}
+createShadows();
+setInterval(()=>{createShadows()},25000);
 
 // ===== 音效系统 =====
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let audioCtx = null;
+const AudioCtx=window.AudioContext||window.webkitAudioContext;
+let audioCtx=null;
 function initAudio(){if(!audioCtx)audioCtx=new AudioCtx()}
 
 function playSound(type){
@@ -166,15 +187,6 @@ case'danger':o.type='sawtooth';o.frequency.setValueAtTime(60,audioCtx.currentTim
 case'heartbeat':o.type='sine';o.frequency.setValueAtTime(50,audioCtx.currentTime);g.gain.setValueAtTime(0.15,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+0.3);o.start();o.stop(audioCtx.currentTime+0.3);setTimeout(()=>{if(!audioCtx)return;const o2=audioCtx.createOscillator();const g2=audioCtx.createGain();o2.connect(g2);g2.connect(audioCtx.destination);o2.type='sine';o2.frequency.setValueAtTime(50,audioCtx.currentTime);g2.gain.setValueAtTime(0.1,audioCtx.currentTime);g2.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+0.2);o2.start();o2.stop(audioCtx.currentTime+0.2)},200);break;
 case'whisper':o.type='sine';o.frequency.setValueAtTime(800,audioCtx.currentTime);o.frequency.exponentialRampToValueAtTime(400,audioCtx.currentTime+0.3);g.gain.setValueAtTime(0.03,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.4);o.start();o.stop(audioCtx.currentTime+0.4);break;
 case'tension':o.type='triangle';o.frequency.setValueAtTime(100,audioCtx.currentTime);o.frequency.linearRampToValueAtTime(150,audioCtx.currentTime+1);g.gain.setValueAtTime(0.06,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+1.2);o.start();o.stop(audioCtx.currentTime+1.2);break;
-}}
-
-function playMoodSound(mood){
-switch(mood){
-case'danger':playSound('danger');break;
-case'dread':playSound('tension');break;
-case'heartbreak':playSound('whisper');break;
-case'tension':playSound('heartbeat');break;
-case'uncanny':playSound('tension');break;
 }}
 
 // ===== 粒子系统 =====
@@ -211,17 +223,17 @@ function setMood(mood){
 currentMood=mood;
 const atmo=document.getElementById('atmosphere');
 atmo.className='mood-'+mood;
+const fog=document.getElementById('fog-layer');
 switch(mood){
-case'dread':particleColor='rgba(100,130,180,';particleSpeed=0.2;particleCount=25;break;
-case'danger':particleColor='rgba(180,80,80,';particleSpeed=0.5;particleCount=40;break;
-case'tension':particleColor='rgba(140,100,170,';particleSpeed=0.35;particleCount=35;break;
-case'intimacy':particleColor='rgba(180,150,100,';particleSpeed=0.15;particleCount=20;break;
-case'heartbreak':particleColor='rgba(150,150,160,';particleSpeed=0.1;particleCount=15;break;
-case'calm':particleColor='rgba(120,140,170,';particleSpeed=0.2;particleCount=20;break;
-case'uncanny':particleColor='rgba(130,170,100,';particleSpeed=0.4;particleCount=45;break;
+case'dread':particleColor='rgba(100,130,180,';particleSpeed=0.2;particleCount=25;fog.style.opacity='0.5';break;
+case'danger':particleColor='rgba(180,80,80,';particleSpeed=0.5;particleCount=40;fog.style.opacity='0.6';break;
+case'tension':particleColor='rgba(140,100,170,';particleSpeed=0.35;particleCount=35;fog.style.opacity='0.5';break;
+case'intimacy':particleColor='rgba(180,150,100,';particleSpeed=0.15;particleCount=20;fog.style.opacity='0.2';break;
+case'heartbreak':particleColor='rgba(150,150,160,';particleSpeed=0.1;particleCount=15;fog.style.opacity='0.3';break;
+case'calm':particleColor='rgba(120,140,170,';particleSpeed=0.2;particleCount=20;fog.style.opacity='0.3';break;
+case'uncanny':particleColor='rgba(130,170,100,';particleSpeed=0.4;particleCount=45;fog.style.opacity='0.7';break;
 }
-initParticles();
-playMoodSound(mood)}
+initParticles()}
 
 function screenShake(){document.body.classList.add('shake');setTimeout(()=>document.body.classList.remove('shake'),500)}
 
@@ -285,7 +297,7 @@ document.getElementById('custom-input-area').style.display='none';
 sendMessage('D. '+text)}
 
 // ===== 系统提示词 =====
-let SYSTEM_PROMPT = '';
+let SYSTEM_PROMPT='';
 
 async function loadPrompt(){
 try{
@@ -323,11 +335,12 @@ messages.push({role:'assistant',content:reply});
 let parsed;
 try{
 let jsonStr=reply.trim();
-if(jsonStr.includes('```')){jsonStr=jsonStr.replace(/```json?\n?/g,'').replace(/```\n?/g,'').trim()}
+jsonStr=jsonStr.replace(/```json?\s*/g,'').replace(/```\s*/g,'').trim();
 const jsonMatch=jsonStr.match(/\{[\s\S]*\}/);
-if(jsonMatch){parsed=JSON.parse(jsonMatch[0])}else{throw new Error('no json')}}
+if(!jsonMatch)throw new Error('未找到JSON');
+parsed=JSON.parse(jsonMatch[0])}
 catch(e){
-parsed={speaker:'',text:reply,mood:'calm',choices:['A. 继续','B. 观察周围','C. 等待','D. 自定义'],sound:'none'}}
+parsed={speaker:'',text:reply.replace(/[{}"]/g,'').replace(/\\n/g,'\n').substring(0,500),mood:'calm',choices:['A. 继续','B. 观察周围','C. 等待','D. 自定义'],sound:'none'}}
 
 loading.classList.remove('show');
 await displayScene(parsed);
@@ -340,7 +353,7 @@ document.getElementById('dialogue-text').textContent='连接失败：'+err.messa
 // ===== 显示场景 =====
 async function displayScene(data){
 if(data.mood&&data.mood!==currentMood){setMood(data.mood)}
-if(data.sound&&data.sound!=='none'){playSound(data.sound)}
+if(data.sound&&data.sound!=='none'){initAudio();playSound(data.sound)}
 if(data.mood==='danger'){screenShake()}
 
 const nameEl=document.getElementById('speaker-name');
@@ -371,7 +384,7 @@ messages=[];
 gameHistory=[];
 await loadPrompt();
 if(!SYSTEM_PROMPT||SYSTEM_PROMPT.length<100){
-document.getElementById('dialogue-text').textContent='提示词加载异常（长度：'+(SYSTEM_PROMPT?SYSTEM_PROMPT.length:0)+'），请检查prompt.txt文件是否存在。';
+document.getElementById('dialogue-text').textContent='提示词加载异常，请检查prompt.txt文件';
 return}
 sendMessage('开始游戏')}
 
@@ -460,7 +473,6 @@ closeSavePanel();
 const lastScene=gameHistory.filter(h=>h.role==='assistant').pop();
 if(lastScene){displayScene({speaker:lastScene.speaker||'',text:lastScene.content,mood:lastScene.mood||'calm',choices:['A. 继续','B. 观察周围','C. 回忆刚才发生的事','D. 自定义'],sound:'none'})}}
 
-// 退出自动存档
 window.addEventListener('beforeunload',()=>{
 if(messages.length>0){
 const preview=gameHistory.length>0?gameHistory[gameHistory.length-1].content.substring(0,20)+'...':'自动存档';
