@@ -274,7 +274,6 @@ btn.className='choice-btn fade-in';
 btn.textContent=c;
 btn.onclick=()=>selectChoice(c);
 area.appendChild(btn)}});
-// 重新生成按钮
 const regenBtn=document.createElement('div');
 regenBtn.className='choice-btn';
 regenBtn.textContent='↻ 重新生成';
@@ -314,7 +313,7 @@ const res=await fetch('./prompt.txt');
 if(!res.ok)throw new Error('prompt文件加载失败：'+res.status);
 SYSTEM_PROMPT=await res.text();
 }catch(e){
-SYSTEM_PROMPT='你是规则怪谈×情侣模拟器的DM。请用JSON格式输出：{"speaker":"","text":"","mood":"calm","choices":["A.","B.","C.","D. 自定义"],"sound":"none"}';
+SYSTEM_PROMPT='你是规则怪谈×情侣模拟器的DM。直接输出纯JSON：{"speaker":"","text":"","mood":"calm","choices":["A.","B.","C.","D. 自定义"],"sound":"none"}';
 }}
 
 // ===== API 通信 =====
@@ -347,22 +346,34 @@ let jsonStr=reply.trim();
 jsonStr=jsonStr.replace(/```json?\s*/g,'').replace(/```\s*/g,'').trim();
 const jsonMatch=jsonStr.match(/\{[\s\S]*\}/);
 if(!jsonMatch)throw new Error('未找到JSON');
-parsed=JSON.parse(jsonMatch[0])}
+parsed=JSON.parse(jsonMatch[0]);
+if(!parsed.text)throw new Error('缺少text字段')}
 catch(e){
-// 兜底：尝试从原始文本提取可读内容
+// 兜底解析：提取text字段内容
 let cleanText=reply;
+const textMatch=cleanText.match(/"text"\s*:\s*"([\s\S]*?)(?:"\s*[,}])/);
+if(textMatch){
+cleanText=textMatch[1].replace(/\\n/g,'\n').replace(/\\"/g,'"')}
+else{
 cleanText=cleanText.replace(/```json?\s*/g,'').replace(/```\s*/g,'');
-cleanText=cleanText.replace(/"speaker"\s*:\s*"[^"]*"\s*,?\s*/g,'');
-cleanText=cleanText.replace(/"mood"\s*:\s*"[^"]*"\s*,?\s*/g,'');
-cleanText=cleanText.replace(/"choices"\s*:\s*\[[\s\S]*?\]\s*,?\s*/g,'');
-cleanText=cleanText.replace(/"sound"\s*:\s*"[^"]*"\s*,?\s*/g,'');
-cleanText=cleanText.replace(/"text"\s*:\s*"/g,'');
-cleanText=cleanText.replace(/[{}]/g,'').replace(/\\n/g,'\n').replace(/"\s*,?\s*$/,'').trim();
-parsed={speaker:'',text:cleanText.substring(0,1000),mood:'calm',choices:['A. 继续','B. 观察周围','C. 等待','D. 自定义'],sound:'none'}}
+cleanText=cleanText.replace(/\{[\s\S]*?"text"\s*:\s*"/,'');
+cleanText=cleanText.replace(/"\s*,\s*"mood"[\s\S]*/,'');
+cleanText=cleanText.replace(/\\n/g,'\n').replace(/\\"/g,'"');
+if(cleanText===reply){cleanText=reply.replace(/[{}"]/g,'').replace(/\\n/g,'\n').substring(0,1000)}}
+// 尝试提取mood
+let moodVal='calm';
+const moodMatch=reply.match(/"mood"\s*:\s*"(\w+)"/);
+if(moodMatch)moodVal=moodMatch[1];
+// 尝试提取choices
+let choicesVal=['A. 继续','B. 观察周围','C. 等待','D. 自定义'];
+const choicesMatch=reply.match(/"choices"\s*:\s*\[([\s\S]*?)\]/);
+if(choicesMatch){
+try{choicesVal=JSON.parse('['+choicesMatch[1]+']')}catch(ce){}}
+parsed={speaker:'',text:cleanText.trim(),mood:moodVal,choices:choicesVal,sound:'none'}}
 
 loading.classList.remove('show');
 await displayScene(parsed);
-gameHistory.push({role:'assistant',content:parsed.text,speaker:parsed.speaker,mood:parsed.mood})}
+gameHistory.push({role:'assistant',content:parsed.text,speaker:parsed.speaker||'',mood:parsed.mood||'calm'})}
 catch(err){
 loading.classList.remove('show');
 document.getElementById('dialogue-text').textContent='连接失败：'+err.message;
@@ -479,8 +490,8 @@ function loadFromSlot(n){
 const data=localStorage.getItem('rh_save_'+n);
 if(!data){alert('该档位为空');return}
 const s=JSON.parse(data);
-messages=s.messages;
-gameHistory=s.history;
+messages=s.messages||[];
+gameHistory=s.history||[];
 currentMood=s.mood||'calm';
 setMood(currentMood);
 document.getElementById('setup-screen').style.display='none';
@@ -488,8 +499,10 @@ document.getElementById('title-screen').style.display='none';
 document.getElementById('game-container').style.display='flex';
 document.getElementById('toolbar').style.display='flex';
 closeSavePanel();
-const lastScene=gameHistory.filter(h=>h.role==='assistant').pop();
-if(lastScene){displayScene({speaker:lastScene.speaker||'',text:lastScene.content,mood:lastScene.mood||'calm',choices:['A. 继续','B. 观察周围','C. 回忆刚才发生的事','D. 自定义'],sound:'none'})}}
+// 读档后让AI从上次位置继续
+const textEl=document.getElementById('dialogue-text');
+textEl.textContent='正在恢复进度...';
+sendMessage('继续上次的剧情，从刚才停下的地方继续推进。')}
 
 window.addEventListener('beforeunload',()=>{
 if(messages.length>0){
