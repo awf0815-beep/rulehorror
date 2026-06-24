@@ -360,7 +360,7 @@ method:'POST',
 headers:{'Content-Type':'application/json','Authorization':'Bearer '+config.key},
 body:JSON.stringify({model:config.model,messages:[{role:'system',content:SYSTEM_PROMPT},...messages],stream:false})});
 
-if(!res.ok)throw new Error('API请求失败：'+res.status);
+if(!res.ok){const errBody=await res.text();throw new Error('API：'+res.status+' '+errBody);}
 const data=await res.json();
 const reply=data.choices[0].message.content;
 messages.push({role:'assistant',content:reply});
