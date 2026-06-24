@@ -372,7 +372,7 @@ await loadPrompt();
 if(!SYSTEM_PROMPT||SYSTEM_PROMPT.length<100){
 document.getElementById('dialogue-text').textContent='提示词加载异常（长度：'+(SYSTEM_PROMPT?SYSTEM_PROMPT.length:0)+'），请检查prompt.txt文件是否存在。';
 return}
-sendMessage(null)}
+sendMessage('开始游戏')}
 
 window.onload=function(){
 const saved=localStorage.getItem('rh_config');
